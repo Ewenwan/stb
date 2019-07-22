@@ -8,7 +8,74 @@ single-file public domain (or MIT licensed) libraries for C/C++ <a name="stb_lib
 Most libraries by stb, except: stb_dxt by Fabian "ryg" Giesen, stb_image_resize
 by Jorge L. "VinoBS" Rodriguez, and stb_sprintf by Jeff Roberts.
 
+说到图像解码库，最容易想起的就是 libpng 和 libjpeg 这两个老牌图像解码库了。
 
+libpng 和 libjpeg 分别各自对应 png 和 jpeg 两种图像格式。这两种格式的区别如下：
+
+png 支持透明度，无损压缩的图片格式，能在保证不失真的情况下尽可能压缩图像文件的大小，因此图像质量高，在一些贴纸应用中也大部分用的是 png 图片。
+
+jpg 不支持透明度，有损压缩的图片格式，有损压缩会使得原始图片数据质量下载，也因此它占用的内存小，在网页应用中加速速度快。
+
+要想在工程中同时解码 png 和 jpeg 格式图片，就必须同时引用这两种库，而且还得经过一系列编译步骤才行。
+
+在这里，介绍一个简单易用的图像库：stb_image 。Github 地址为：https://github.com/nothings/stb ，目前已经有了 9600+ Star 。它的使用非常简单，看看 README 可能你就会了。
+
+看看它的源码，你会发现全是 .h 头文件。这就是它的强大之处了，仅需在工程中加入头文件就可以解析图像了（实际上是函数实现等内容都放在头文件了而已）。
+重点关注如下三个头文件：
+
+stb_image.h         用于图像加载
+
+stb_image_write.h   用于写入图像文件
+
+stb_image_resize.h  用于改变图像尺寸
+```c
+// 加载了一张图片，并将它的宽高都缩小一倍，并保存缩小后图片。
+#include <iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "stb_image_resize.h"
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    std::cout << "Hello, STB_Image" << std::endl;
+
+    string inputPath = "/Users/glumes/Pictures/input.png";
+    int iw, ih, n;
+    
+    // 加载图片获取宽、高、颜色通道信息
+    unsigned char *idata = stbi_load(inputPath.c_str(), &iw, &ih, &n, 0);
+
+    int ow = iw / 2;
+    int oh = ih / 2;
+    auto *odata = (unsigned char *) malloc(ow * oh * n);
+    
+    // 改变图片尺寸
+    stbir_resize(idata, iw, ih, 0, odata, ow, oh, 0, STBIR_TYPE_UINT8, n, STBIR_ALPHA_CHANNEL_NONE, 0,
+                 STBIR_EDGE_CLAMP, STBIR_EDGE_CLAMP,
+                 STBIR_FILTER_BOX, STBIR_FILTER_BOX,
+                 STBIR_COLORSPACE_SRGB, nullptr
+    );
+
+    string outputPath = "/Users/glumes/Pictures/output.png";
+    // 写入图片
+    stbi_write_png(outputPath.c_str(), ow, oh, n, odata, 0);
+
+    stbi_image_free(idata);
+    stbi_image_free(odata);
+    return 0;
+}
+
+
+```
 library    | lastest version | category | LoC | description
 --------------------- | ---- | -------- | --- | --------------------------------
 **[stb_vorbis.c](stb_vorbis.c)** | 1.16 | audio | 5486 | decode ogg vorbis files from file/memory to float/16-bit signed output
