@@ -28,6 +28,38 @@ stb_image.h         用于图像加载
 stb_image_write.h   用于写入图像文件
 
 stb_image_resize.h  用于改变图像尺寸
+
+
+首先是调用 stbi_load 方法去加载图像数据，并获取相关信息。传入的参数除了图片文件地址，还有宽、高、颜色通道信息的引用。
+变量 n 就代表图片的颜色通道值，通常有如下的情况：
+
+        1 ： 灰度图
+        2 ： 灰度图加透明度
+        3 ： 红绿蓝 RGB 三色图
+        4 ： 红绿蓝加透明度 RGBA 图
+
+返回的结果就是图片像素数据的指针了。
+stbi_load 不仅仅支持 png 格式，把上面例子中的图片改成 jpg 格式后缀的依旧可行。
+它支持的所有格式如下：
+
+        png
+        jpg
+        tga
+        bmp
+        psd
+        gif
+        hdr
+        pic
+
+格式虽多，不过一般用到 png 和 jpg 就好了。
+
+除了从文件加载图片，stb_image 还支持从内存中加载图片，通过该方法 stbi_load_from_memory ，在后续文章中会用到它的。
+加载完图片之后，stb_image 还提供了相应的释放方法 stbi_image_free，实际上就是把 free 封装了一下而已。
+
+sbt_image_resize
+加载完图片像素数据之后，就可以通过 stbir_resize 方法改变图片的尺寸。
+
+
 ```c
 // 加载了一张图片，并将它的宽高都缩小一倍，并保存缩小后图片。
 #include <iostream>
